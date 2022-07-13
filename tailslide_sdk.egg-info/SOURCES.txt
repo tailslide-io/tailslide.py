@@ -1,0 +1,8 @@
+LICENSE
+setup.py
+src/tailslide/__init__.py
+src/tailslide/main.py
+tailslide_sdk.egg-info/PKG-INFO
+tailslide_sdk.egg-info/SOURCES.txt
+tailslide_sdk.egg-info/dependency_links.txt
+tailslide_sdk.egg-info/top_level.txt
