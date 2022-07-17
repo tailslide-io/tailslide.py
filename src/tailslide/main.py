@@ -20,8 +20,10 @@ class NatsClient():
 
     async def fetchFlags(self):
         await self.connect()
-        await self.fetchLatestMessages()
-        await self.fetchOngoingMessages()
+        future = await self.fetchLatestMessages()
+        asyncio.ensure_future(self.fetchOngoingMessages())
+        return future
+        # await self.fetchOngoingMessages()
 
     async def connect(self):
         print('connecting')
@@ -35,8 +37,10 @@ class NatsClient():
         if not self.future.done():
             self.future.set_result(message)
         self.callback(message)
+        return self.future
 
     async def fetchOngoingMessages(self):
+        await self.latestFlagsReady()
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.NEW)
         self.subscribed_stream = await self.jet_stream.subscribe(stream="flags", subject=self.app_id, config=config)
@@ -67,51 +71,13 @@ class NatsClient():
     #     await self.nats_connection.close()
 
 
-async def main():
-
-    async def disconnected_cb():
-        print("Got disconnected...")
-
-    async def reconnected_cb():
-        print("Got reconnected...")
-
-    nc = await nats.connect("127.0.0.1",
-                            reconnected_cb=reconnected_cb,
-                            disconnected_cb=disconnected_cb,
-                            max_reconnect_attempts=-1
-                            )
-
-    js = nc.jetstream()
-
-    config = nats.js.api.ConsumerConfig(
-        deliver_policy=nats.js.api.DeliverPolicy.NEW)
-
-    # consumer_info = await js.add_consumer(
-    #     "flags",
-    #     durable_name="dur",
-    #     deliver_policy=nats.js.api.DeliverPolicy.ALL,
-    #     deliver_subject="10"
-    # )
-    sub = await js.subscribe(stream="flags", subject="9", config=config)
-
-    message = await sub.next_msg()
-    print(message)
-    print("Listening for requests")
-    for i in range(1, 1000000):
-        try:
-            message = await sub.next_msg()
-            print(message.data.decode())
-        except Exception as e:
-            print("Error:", e)
-
-
 def logger(message):
     print(message)
     messages.append(message)
 
 
-async def log_messages(natClient):
-    await natClient.latestFlagsReady()
+async def log_messages():
+    # await natClient.latestFlagsReady()
     while True:
         print(messages)
         await asyncio.sleep(3)
@@ -126,10 +92,12 @@ async def print_numbers():
 async def main():
     natsClient = NatsClient(app_id=9, callback=logger)
     try:
-        task1 = asyncio.create_task(natsClient.fetchFlags())
-        task2 = asyncio.create_task(log_messages(natsClient))
-        await task1
-        await task2
+        # task1 = asyncio.create_task(natsClient.fetchFlags())
+        # task2 = asyncio.create_task(log_messages(natsClient))
+        # await task1
+        # await task2
+        await natsClient.fetchFlags()
+        # await log_messages()
         print('hello')
         print(messages)
 
