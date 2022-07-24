@@ -10,10 +10,8 @@ messages = []
 class NatsClient():
     def __init__(self, server='nats://localhost:4222', subject='', callback=None, sdk_key=''):
         self.nats_connection = None
-        self.jet_stream_manager = None
-        self.jet_stream = None
+        self.jetstream = None
         self.subscribed_stream = None
-        self.server = server
         self.nats_config = {"servers": server, "token": sdk_key}
         self.subject = str(subject)
         self.callback = callback or (lambda _: _)
@@ -27,14 +25,13 @@ class NatsClient():
 
     async def connect(self):
         self.nats_connection = await nats.connect(**self.nats_config)
-        self.jet_stream_manager = nats.js.JetStreamManager(conn=self.server)
-        self.jet_stream = self.nats_connection.jetstream()
+        self.jetstream = self.nats_connection.jetstream()
 
     async def fetch_latest_messages(self):
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.LAST,
             )
-        subscribed_stream = await self.jet_stream.subscribe(stream="flags", subject=self.subject, config=config)
+        subscribed_stream = await self.jetstream.subscribe(stream="flags", subject=self.subject, config=config)
         try:
             message_response = await subscribed_stream.next_msg(timeout=None)
             message = message_response.data.decode()
@@ -52,7 +49,7 @@ class NatsClient():
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.NEW,
             )
-        self.subscribed_stream = await self.jet_stream.subscribe(stream="flags", subject=self.subject, config=config)
+        self.subscribed_stream = await self.jetstream.subscribe(stream="flags", subject=self.subject, config=config)
 
         while self.nats_connection.is_connected:
             try:
