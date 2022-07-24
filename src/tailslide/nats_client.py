@@ -19,7 +19,7 @@ class NatsClient():
 
     async def initialize_flags(self):
         await self.connect()
-        future = await self.fetch_latest_messages()
+        future = await self.fetch_latest_message()
         asyncio.ensure_future(self.fetch_ongoing_event_messages())
         return future
 
@@ -27,7 +27,7 @@ class NatsClient():
         self.nats_connection = await nats.connect(**self.nats_config)
         self.jetstream = self.nats_connection.jetstream()
 
-    async def fetch_latest_messages(self):
+    async def fetch_latest_message(self):
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.LAST,
             )
