@@ -41,9 +41,8 @@ class NatsClient():
             message_response = await subscribed_stream.next_msg(timeout=None)
             message = message_response.data.decode()
             json_data = json.loads(message)
-            print(json_data[0])
             if not self.future.done():
-                self.future.set_result(message)
+                self.future.set_result(json_data)
             self.callback(message)
         except ConnectionClosedError:
             print('disconnected from nats')

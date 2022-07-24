@@ -4,6 +4,7 @@ src/tailslide/__init__.py
 src/tailslide/flag_manager.py
 src/tailslide/main.py
 src/tailslide/nats_client.py
+src/tailslide/redis.py
 src/tailslide/test.py
 src/tailslide/toggler.py
 tailslide_sdk.egg-info/PKG-INFO

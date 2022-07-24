@@ -21,12 +21,12 @@ class Toggler:
     flag = self._get_matching_flag()
     return flag["is_active"] and (self._is_user_white_listed(flag) or self._validate_user_rollout(flag))
 
-  async def emit_success(self):
+  def emit_success(self):
     if not self.flag_id:
       return
     self.emit_redis_signal(self.flag_id, self.app_id, 'success')
     
-  async def emit_failure(self):
+  def emit_failure(self):
     if not self.flag_id:
       return
     self.emit_redis_signal(self.flag_id, self.app_id, 'failure')

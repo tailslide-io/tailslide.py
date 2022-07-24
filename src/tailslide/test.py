@@ -9,7 +9,9 @@ config = {
     "server": 'nats://localhost:4222',
     "app_id": 1,
     'user_context': '375d39e6-9c3f-4f58-80bd-e5960b710295',
-    'sdk_key': 'myToken'
+    'sdk_key': 'myToken',
+    'redis_host': 'localhost',
+    'redis_port': 6379
 }
 
 
@@ -28,8 +30,10 @@ async def main():
     while True:
         if (flag_toggler.is_flag_active()):
             print(f'Flag in {app_id} with name "{flag_name}" is active!')
+            flag_toggler.emit_success()
         else:
             print(f'Flag in {app_id} with name "{flag_name}" is not active!')
+            flag_toggler.emit_failure()
             
         await asyncio.sleep(5)
 

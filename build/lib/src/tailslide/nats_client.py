@@ -58,10 +58,12 @@ class NatsClient():
             try:
                 message_response = await self.subscribed_stream.next_msg(timeout=None)
                 message = message_response.data.decode()
-                self.callback(message)
+                json_data = json.loads(message)
+                self.callback(json_data)
             except ConnectionClosedError as e:
                 print('disconnected from nats', e)
                 break
+
 
     def latest_flags_ready(self):
         return self.future
