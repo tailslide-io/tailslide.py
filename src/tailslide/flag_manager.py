@@ -4,8 +4,9 @@ from toggler import Toggler
 
 
 class FlagManager:
-  def __init__(self, server='', app_id='', sdk_key='', user_context='', redis_host='', redis_port=None):
-    self.nats_client = NatsClient(server=server, subject=app_id, callback=self._set_flags, token=sdk_key)
+  def __init__(self, nats_server='', stream='', app_id='', sdk_key='', user_context='', redis_host='', redis_port=None):
+    nats_server = f"nats://{nats_server}"
+    self.nats_client = NatsClient(server=nats_server, stream=stream, subject=app_id, callback=self._set_flags, token=sdk_key)
     self.redis_ts_client = RedisTimeSeriesClient(redis_host, redis_port)
     
     self.flags = []

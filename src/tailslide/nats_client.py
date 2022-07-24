@@ -8,11 +8,12 @@ messages = []
 
 
 class NatsClient():
-    def __init__(self, server='nats://localhost:4222', subject='', callback=None, token=''):
+    def __init__(self, server='nats://localhost:4222', stream="", subject='', callback=None, token=''):
         self.nats_connection = None
         self.jetstream = None
         self.subscribed_stream = None
         self.nats_config = {"servers": server, "token": token}
+        self.stream = str(stream)
         self.subject = str(subject)
         self.callback = callback or (lambda _: _)
         self.future = asyncio.Future()
@@ -31,7 +32,7 @@ class NatsClient():
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.LAST,
             )
-        subscribed_stream = await self.jetstream.subscribe(stream="flags", subject=self.subject, config=config)
+        subscribed_stream = await self.jetstream.subscribe(stream=self.stream, subject=self.subject, config=config)
         try:
             message_response = await subscribed_stream.next_msg(timeout=None)
             message = message_response.data.decode()
