@@ -10,6 +10,7 @@ setup(
     license='MIT',
     packages=['src/tailslide'],
     install_requires=[
+        "nats-py >= 2.1.4"
     ],
 
     classifiers=[

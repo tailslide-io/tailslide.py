@@ -1,7 +1,5 @@
 import asyncio
 import json
-import threading
-import time
 
 import nats
 from nats.errors import ConnectionClosedError, TimeoutError
@@ -21,10 +19,10 @@ class NatsClient():
         self.callback = callback or (lambda _: _)
         self.future = asyncio.Future()
 
-    async def fetchFlags(self):
+    async def initialize_flags(self):
         await self.connect()
-        future = await self.fetchLatestMessages()
-        asyncio.ensure_future(self.fetchOngoingMessages())
+        future = await self.fetch_latest_messages()
+        asyncio.ensure_future(self.fetch_ongoing_event_messages())
         return future
 
     async def connect(self):
@@ -32,7 +30,7 @@ class NatsClient():
         self.jet_stream_manager = nats.js.JetStreamManager(conn=self.server)
         self.jet_stream = self.nats_connection.jetstream()
 
-    async def fetchLatestMessages(self):
+    async def fetch_latest_messages(self):
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.LAST,
             )
@@ -43,18 +41,14 @@ class NatsClient():
             json_data = json.loads(message)
             if not self.future.done():
                 self.future.set_result(json_data)
-            self.callback(message)
-        except ConnectionClosedError:
-            print('disconnected from nats')
-        except TimeoutError as e:
-            print("Error:", e)
-        except AttributeError:
-            pass
-        await subscribed_stream.unsubscribe()
+            self.callback(json_data)
+            await subscribed_stream.unsubscribe()
+        except ConnectionClosedError as e:
+            print('disconnected from nats', e)
         return self.future
 
-    async def fetchOngoingMessages(self):
-        await self.latestFlagsReady()
+    async def fetch_ongoing_event_messages(self):
+        await self.latest_flags_ready()
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.NEW,
             )
@@ -65,15 +59,11 @@ class NatsClient():
                 message_response = await self.subscribed_stream.next_msg(timeout=None)
                 message = message_response.data.decode()
                 self.callback(message)
-            except ConnectionClosedError:
-                print('disconnected from nats')
+            except ConnectionClosedError as e:
+                print('disconnected from nats', e)
                 break
-            except TimeoutError as e:
-                print("Error:", e)
-            except AttributeError:
-                pass
 
-    def latestFlagsReady(self):
+    def latest_flags_ready(self):
         return self.future
 
     async def disconnect(self):
@@ -82,37 +72,3 @@ class NatsClient():
     # async def __del__(self):
     #     print('closing nats')
     #     await self.nats_connection.close()
-
-
-def logger(message):
-    print(message)
-    messages.append(message)
-
-
-async def log_messages():
-    # await natClient.latestFlagsReady()
-    while True:
-        print(messages)
-        await asyncio.sleep(3)
-
-
-
-
-async def main():
-    natsClient = NatsClient(subject='test', callback=logger, sdk_key="myToken")
-    try:
-        # task1 = asyncio.create_task(natsClient.fetchFlags())
-        # task2 = asyncio.create_task(log_messages(natsClient))
-        # await task1
-        # await task2
-        await natsClient.fetchFlags()
-        print('hello')
-        while True:
-            await asyncio.sleep(2)
-            print(messages)
-
-    except Exception as e:
-        print(e)
-
-if __name__ == '__main__':
-    asyncio.run(main())

@@ -18,8 +18,8 @@ class FlagManager:
   def _set_flags(self, flags):
     mapped_flags = []
     for flag in flags:
-      flag["rollout_percentage"]= float(flag["rollout_percentage"])
-      flag["rollout_percentage"]= float(flag["circuit_recovery_percentage"])
+      flag.rollout_percentage = float(flag.rollout_percentage)
+      flag.circuit_recovery_percentage = float(flag.circuit_recvoery_percentage)
       mapped_flags.append(flag)
     self.flags= mapped_flags
   

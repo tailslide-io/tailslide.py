@@ -19,8 +19,7 @@ class Toggler:
    
   def is_flag_active(self):
     flag = self._get_matching_flag()
-    print(flag)
-    return flag["is_active"] and (self._is_user_white_listed(flag) or self._validate_user_rollout(flag))
+    return flag.is_active and (self._is_user_white_listed() or self._validate_user_rollout())
 
   async def emit_success(self):
     if not self.flag_id:
@@ -34,37 +33,36 @@ class Toggler:
 
   def _set_flag_id_and_app_id(self, flag_name):
     matching_flag = self._get_matching_flag()
-    self.flag_id = str(matching_flag["id"])
-    self.app_id = str(matching_flag["app_id"])
+    self.flag_id = str(matching_flag.id)
+    self.app_id = str(matching_flag.app_id)
     
   def _get_matching_flag(self):
-      flags = self.get_flags()
+      flags = self.getFlags()
       for flag in flags:
-        if flag["title"] == self.flag_name:
+        if flag.title == self.flag_name:
           return flag
       
       raise Exception(f'Cannot find flag with flag name of: {self.flag_name}')
   
   def _is_user_white_listed(self,flag):
-    for white_listed_user in flag["white_listed_users"].split(','):
+    for white_listed_user in flag.white_listed_users.split(','):
       if white_listed_user == self.user_context:
         return True
     return False
 
   def _validate_user_rollout(self, flag):
-    rollout = flag["rollout_percentage"] / 100
+    rollout = flag.rollout_percentage / 100
     if self._circuit_in_recovery(flag):
-      rollout = rollout * (flag["circuit_recovery_percentage"] / 100)
+      rollout = rollout * (flag.circuit_recovery_percentage / 100)
     return self._is_user_in_rollout(rollout)
 
   def _circuit_in_recovery(self, flag):
-    return flag["is_recoverable"] and flag["circuit_status"] == 'recovery'
+    return flag.is_recoverable and flag.circuit_status == 'recovery'
   
   def _is_user_in_rollout(self, rollout):
     return self._hash_user_context() <= rollout
   
   def _hash_user_context(self):
-    hash = hashlib.md5(self.user_context.encode()).hexdigest()
+    hash = hashlib.md5(self.user_context.encode())
     value = (int(hash, 16) % 100) / 100
-    print(value)
     return value
