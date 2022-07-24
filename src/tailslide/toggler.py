@@ -19,7 +19,6 @@ class Toggler:
    
   def is_flag_active(self):
     flag = self._get_matching_flag()
-    print(flag)
     return flag["is_active"] and (self._is_user_white_listed(flag) or self._validate_user_rollout(flag))
 
   async def emit_success(self):
@@ -61,10 +60,10 @@ class Toggler:
     return flag["is_recoverable"] and flag["circuit_status"] == 'recovery'
   
   def _is_user_in_rollout(self, rollout):
+    print(self._hash_user_context(), rollout)
     return self._hash_user_context() <= rollout
   
   def _hash_user_context(self):
     hash = hashlib.md5(self.user_context.encode()).hexdigest()
     value = (int(hash, 16) % 100) / 100
-    print(value)
     return value

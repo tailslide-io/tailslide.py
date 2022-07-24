@@ -9,7 +9,6 @@ messages = []
 
 class NatsClient():
     def __init__(self, server='nats://localhost:4222', subject='', callback=None, sdk_key=''):
-        print(server, sdk_key, subject)
         self.nats_connection = None
         self.jet_stream_manager = None
         self.jet_stream = None
@@ -40,7 +39,6 @@ class NatsClient():
             message_response = await subscribed_stream.next_msg(timeout=None)
             message = message_response.data.decode()
             json_data = json.loads(message)
-            print(json_data)
             if not self.future.done():
                 self.future.set_result(json_data)
             self.callback(json_data)
@@ -60,10 +58,12 @@ class NatsClient():
             try:
                 message_response = await self.subscribed_stream.next_msg(timeout=None)
                 message = message_response.data.decode()
-                self.callback(message)
+                json_data = json.loads(message)
+                self.callback(json_data)
             except ConnectionClosedError as e:
                 print('disconnected from nats', e)
                 break
+
 
     def latest_flags_ready(self):
         return self.future

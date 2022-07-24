@@ -25,13 +25,13 @@ async def main():
     
     flag_toggler = manager.new_toggler(flag_config)
     
-    if (flag_toggler.is_flag_active()):
-        print(f'Flag in {app_id} with name "{flag_name}" is active!')
-    else:
-        print(f'Flag in {app_id} with name "{flag_name}" is not active!')
-        
     while True:
-        await asyncio.sleep(2)
+        if (flag_toggler.is_flag_active()):
+            print(f'Flag in {app_id} with name "{flag_name}" is active!')
+        else:
+            print(f'Flag in {app_id} with name "{flag_name}" is not active!')
+            
+        await asyncio.sleep(5)
 
 
 
