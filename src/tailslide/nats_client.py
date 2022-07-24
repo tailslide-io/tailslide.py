@@ -8,11 +8,11 @@ messages = []
 
 
 class NatsClient():
-    def __init__(self, server='nats://localhost:4222', subject='', callback=None, sdk_key=''):
+    def __init__(self, server='nats://localhost:4222', subject='', callback=None, token=''):
         self.nats_connection = None
         self.jetstream = None
         self.subscribed_stream = None
-        self.nats_config = {"servers": server, "token": sdk_key}
+        self.nats_config = {"servers": server, "token": token}
         self.subject = str(subject)
         self.callback = callback or (lambda _: _)
         self.future = asyncio.Future()
