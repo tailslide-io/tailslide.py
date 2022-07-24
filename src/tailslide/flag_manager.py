@@ -1,5 +1,5 @@
 from nats_client import NatsClient
-from redis_client import RedisTimeSeriesClient
+from redis_timeseries_client import RedisTimeSeriesClient
 from toggler import Toggler
 
 
