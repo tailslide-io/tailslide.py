@@ -2,14 +2,10 @@ import hashlib
 
 
 class Toggler:
-  def __init__(self,flag_name='', feature_cb=(lambda _:_), default_cb=(lambda _:_),
-               error_condition=None, get_flags=None, emit_redis_signal=None,
+  def __init__(self,flag_name='', get_flags=None, emit_redis_signal=None,
                user_context=''
                ):
    self.flag_name = flag_name
-   self.feature_cb = feature_cb
-   self.default_cb = default_cb
-   self.error_condition = error_condition
    self.get_flags = get_flags
    self.flag_id = None
    self.app_id = None
@@ -65,5 +61,6 @@ class Toggler:
   
   def _hash_user_context(self):
     hash = hashlib.md5(self.user_context.encode()).hexdigest()
+    print(hash)
     value = (int(hash, 16) % 100) / 100
     return value

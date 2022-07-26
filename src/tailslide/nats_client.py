@@ -14,7 +14,7 @@ class NatsClient():
         self.subscribed_stream = None
         self.nats_config = {"servers": server, "token": token}
         self.stream = str(stream)
-        self.subject = str(subject)
+        self.subject = self._format_subject(str(subject))
         self.callback = callback or (lambda _: _)
         self.future = asyncio.Future()
 
@@ -43,6 +43,8 @@ class NatsClient():
             await subscribed_stream.unsubscribe()
         except ConnectionClosedError as e:
             print('disconnected from nats', e)
+        except AttributeError as e:
+            pass
         return self.future
 
     async def fetch_ongoing_event_messages(self):
@@ -50,7 +52,7 @@ class NatsClient():
         config = nats.js.api.ConsumerConfig(
             deliver_policy=nats.js.api.DeliverPolicy.NEW,
             )
-        self.subscribed_stream = await self.jetstream.subscribe(stream="flags", subject=self.subject, config=config)
+        self.subscribed_stream = await self.jetstream.subscribe(stream=self.stream, subject=self.subject, config=config)
 
         while self.nats_connection.is_connected:
             try:
@@ -61,14 +63,16 @@ class NatsClient():
             except ConnectionClosedError as e:
                 print('disconnected from nats', e)
                 break
+            except AttributeError as e:
+                break
 
 
     def latest_flags_ready(self):
         return self.future
 
     async def disconnect(self):
-        self.nats_connection.close()
+        await self.nats_connection.close()
 
-    # async def __del__(self):
-    #     print('closing nats')
-    #     await self.nats_connection.close()
+    def _format_subject(self,subject):
+        return f"apps.{subject}.>"
+
