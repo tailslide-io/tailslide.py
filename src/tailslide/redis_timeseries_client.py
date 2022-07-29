@@ -11,6 +11,7 @@ class RedisTimeSeriesClient:
     self.redis_client = redis.Redis(host=self.host, port=self.port)
   
   def emit_signal(self, flag_id, app_id, status):
+    print(flag_id, app_id, status)
     self.redis_client.ts().add(f'{flag_id}:{status}', '*', 1,
                                labels={"status":status, "flagId": flag_id, "appId": app_id})
   

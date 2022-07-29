@@ -1,12 +1,12 @@
-from nats_client import NatsClient
-from redis_timeseries_client import RedisTimeSeriesClient
-from toggler import Toggler
+from .nats_client import NatsClient
+from .redis_timeseries_client import RedisTimeSeriesClient
+from .toggler import Toggler
 
 
 class FlagManager:
-  def __init__(self, nats_server='localhost:4222', stream='flags_ruleset', app_id='', sdk_key='', user_context='', redis_host='localhost', redis_port=6379):
-    nats_server = f"nats://{nats_server}"
-    self.nats_client = NatsClient(server=nats_server, stream=stream, subject=app_id, callback=self.set_flags, token=sdk_key)
+  def __init__(self, nats_server='localhost:4222', nats_stream='flags_ruleset', app_id='', sdk_key='', user_context='', redis_host='localhost', redis_port=6379):
+    nats_server = nats_server
+    self.nats_client = NatsClient(server=nats_server, stream=nats_stream, subject=app_id, callback=self.set_flags, token=sdk_key)
     self.redis_ts_client = RedisTimeSeriesClient(redis_host, redis_port)
     
     self.flags = []
