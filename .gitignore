@@ -6,7 +6,7 @@ __pycache__/
 example.py
 .vscode
 .DS_Store
-
+build_info.md
 # C extensions
 *.so
 

@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='tailslide-sdk',
-    version='0.1.5',
+    version='0.1.7',
     description='A example Python package',
     url='https://github.com/shuds13/pyexample',
     author='Steven Liou, Trent Cooper, Elaine Vuong, Jordan Eggers',

@@ -18,7 +18,7 @@ Install the Tailslide npm package with `pip install tailslide-sdk`
 
 ### Instantiating and Initializing FlagManager
 
-The `FlagManager`class is the entry point of this SDK. It is responsible for retrieving all the flag rulesets for a given app with its `app_id` and creating new `Toggler` instances to handle toggling of feature flags within that app. To instantiate a `FlagManger` object, a user must provide a configuration object:
+The `FlagManager`class is the entry point of this SDK. It is responsible for retrieving all the flag rulesets for a given app with its `app_id` and creating new `Toggler` instances to handle toggling of feature flags within that app. To instantiate a `FlagManager` object, a user must provide a configuration object:
 
 ```python
 import asyncio
@@ -55,7 +55,7 @@ After instantiating a `FlagManager`, invoke the `initialize` method. This method
 
 ### Using Feature Flag with Toggler
 
-Once the `FlagManager` is initialized, it can create a `Toggler`, with the `new_toggler` method, for each feature flag that the developer wants to wrap the new and old features in. A `Toggler`’s `is_flag_active` method checks whether the flag with its `flag_name` is active or not based on the flag ruleset. A `Toggler`’s `is_flag_active` method returns a boolean value, which is intended to be used to control branching logic flow within an application at runtime, to invoke new features.
+Once the `FlagManager` is initialized, it can create a `Toggler`, with the `new_toggler` method, for each feature flag that the developer wants to wrap the new and old features in. A `Toggler`’s `is_flag_active` method checks whether the flag with its `flag_name` is active or not based on the flag ruleset. A `Toggler`’s `is_flag_active` method returns a boolean value, which can be used to evaluate whether a new feature should be used or not.
 
 ```python
 flag_config = {
@@ -65,16 +65,16 @@ flag_config = {
 flag_toggler = manager.new_toggler(flag_config)
 
 if flag_toggler.is_flag_active():
-    // call new feature here
+    # call new feature here
 else:
-    // call old feature here
+    # call old feature here
 ```
 
 ---
 
 ### Emitting Success or Failture
 
-To use the `Toggler` instances to record successful or failed operations, call its `emit_success` or `emit_failure` methods:
+To use a `Toggler` instance to record successful or failed operations, call its `emit_success` or `emit_failure` methods:
 
 ```python
 if successCondition:
@@ -96,7 +96,8 @@ The `FlagManager` class is the entry point of the SDK. A new `FlagManager` objec
 **Parameters:**
 
 - An object with the following keys
-  - `server` a string that represents the URL and port of the NATS server.
+  - `nats_server` is the NATS JetStream server `address:port`
+  - `nats_stream` is the NATS JetStream’s stream name that stores all the apps and their flag rulesets
   - `app_id` a number representing the application the microservice belongs to
   - `sdk_key` a string generated via the Tower front-end for NATS JetStream authentication
   - `user_context` a string representing the user’s UUID
@@ -107,23 +108,41 @@ The `FlagManager` class is the entry point of the SDK. A new `FlagManager` objec
 
 #### Instance Methods
 
-###### `FlagManager.prototype.set_user_context(new_user_context)`
+##### `flagmanager.initialize()`
+
+Asynchronously initialize `flagmanager` connections to NATS JetStream and Redis database
 
 **Parameters:**
 
-- A UUID string that represents the current active user
+- `None`
 
 **Return Value:**
 
-- `null`
+- `None`
 
 ---
 
-###### `FlagManager.prototype.get_user_context()`
+##### `flagmanager.set_user_context(new_user_context)`
+
+Set the current user's context for the `flagmanager`
 
 **Parameters:**
 
-- `null`
+- `new_user_context`: A UUID string that represents the current active user
+
+**Return Value:**
+
+- `None`
+
+---
+
+##### `flagmanager.get_user_context()`
+
+Returns the current user context
+
+**Parameters:**
+
+- `None`
 
 **Return Value:**
 
@@ -131,13 +150,13 @@ The `FlagManager` class is the entry point of the SDK. A new `FlagManager` objec
 
 ---
 
-###### `FlagManager.prototype.new_toggler(options)`
+##### `flagmanager.new_toggler(options)`
 
 Creates a new toggler to check for a feature flag's status from the current app's flag ruleset by the flag's name.
 
 **Parameters:**
 
-- An object with key of `flag_name` and a string value representing the name of the feature flag for the new toggler to check whether the new feature is enabled
+- `options`: An object with key of `flag_name` and a string value representing the name of the feature flag for the new toggler to check whether the new feature is enabled
 
 **Return Value:**
 
@@ -145,69 +164,69 @@ Creates a new toggler to check for a feature flag's status from the current app'
 
 ---
 
-###### `FlagManager.prototype.disconnect()`
+##### `flagmanager.disconnect()`
 
 Asynchronously disconnects the `FlagManager` instance from NATS JetStream and Redis database
 
 **Parameters:**
 
-- `null`
+- `None`
 
 **Return Value:**
 
-- `null`
+- `None`
 
 ---
 
 ### Toggler
 
-The Toggler class provides methods that determine whether or not new feature code is run and handles success/failure emissions. Each toggler handles one feature flag, and is created by `FlagManager.prototype.new_toggler()`.
+The Toggler class provides methods that determine whether or not new feature code is run and handles success/failure emissions. Each toggler handles one feature flag, and is created by `flagmanager.new_toggler()`.
 
 ---
 
 #### Instance Methods
 
-##### `is_flag_active()`
+##### `toggler.is_flag_active()`
 
 Checks for flag status, whitelisted users, and rollout percentage in that order to determine whether the new feature is enabled.
 
-- If the flag's active status is false, the function returns `false`
-- If current user's UUID is in the whitelist of users, the function returns `true`
-- If current user's UUID hashes to a value within user rollout percentage, the function returns `true`
-- If current user's UUID hashes to a value outside user rollout percentage, the function returns `false`
+- If the flag's active status is false, the function returns `False`
+- If current user's UUID is in the whitelist of users, the function returns `True`
+- If current user's UUID hashes to a value within user rollout percentage, the function returns `True`
+- If current user's UUID hashes to a value outside user rollout percentage, the function returns `False`
 
 **Parameters:**
 
-- `null`
+- `None`
 
 **Return Value**
 
-- `true` or `flase` depending on whether the feature flag is active
+- `True` or `False` depending on whether the feature flag is active
 
 ---
 
-##### `emit_success()`
+##### `toggler.emit_success()`
 
 Records a successful operation to the Redis Timeseries database, with key `flagId:success` and value of current timestamp
 
 **Parameters:**
 
-- `null`
+- `None`
 
 **Return Value**
 
-- `null`
+- `None`
 
 ---
 
-##### `emit_failure()`
+##### `toggler.emit_failure()`
 
 Records a failure operation to the Redis Timeseries database, with key `flagId:success` and value of current timestamp
 
 **Parameters:**
 
-- `null`
+- `None`
 
 **Return Value**
 
-- `null`
+- `None`
