@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 *$py.class
 example.py
+.vscode
+.DS_Store
 
 # C extensions
 *.so

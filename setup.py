@@ -2,13 +2,13 @@ from setuptools import setup
 
 setup(
     name='tailslide-sdk',
-    version='0.1.0',
+    version='0.1.5',
     description='A example Python package',
     url='https://github.com/shuds13/pyexample',
     author='Steven Liou, Trent Cooper, Elaine Vuong, Jordan Eggers',
     author_email='tailslide.io.2205@gmail.com ',
     license='MIT',
-    packages=['src/tailslide'],
+    packages=['tailslide'],
     install_requires=[
         "nats-py >= 2.1.4",
         "redis >= 4.3.4"
