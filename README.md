@@ -2,7 +2,7 @@
     <img src="https://user-images.githubusercontent.com/73451363/187207442-bae7ea26-7eac-4cab-8806-42779629c653.png" alt="Tailslide logo" width="400">
 </p>
 
-# Python SDK for Tailslide
+# Python SDK
 
 ---
 
